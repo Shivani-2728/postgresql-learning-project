@@ -58,3 +58,19 @@ JOIN salaries s ON e.emp_id = s.emp_id;
 
 -- 10. Index on email for faster lookups
 CREATE INDEX idx_employee_email ON employees(email);
+
+-- 11. Stored procedure - give salary raise to all employees in a department
+CREATE OR REPLACE PROCEDURE give_raise(dept_name_input VARCHAR, raise_percent NUMERIC)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE salaries
+    SET amount = amount + (amount * raise_percent / 100)
+    WHERE emp_id IN (
+        SELECT e.emp_id
+        FROM employees e
+        JOIN departments d ON e.dept_id = d.dept_id
+        WHERE d.dept_name = dept_name_input
+    );
+END;
+$$;
